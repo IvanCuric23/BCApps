@@ -84,8 +84,8 @@ install pop-up. The browser must allow pop-ups from `businesscentral.dynamics.co
 |---|---|---|
 | 1 | **Enabled** | On |
 | 2 | **Has access token** | On (read-only) |
- **Request Access**
-gets a new token, and **Test Connection** checks that the token works. Both actions are on the card.
+
+**Request Access** gets a new token, and **Test Connection** checks that the token works. Both actions are on the card.
 
 ## 3. Products and inventory
 
