@@ -2,7 +2,7 @@
 
 How to run the Shopify Connector once it is set up: what to check each day, how orders become sales orders, and
 what to do when something does not come through. Setup is in
-[shopify-connector-setup-guide.md](shopify-connector-setup-guide.md).
+the [Setup Guide](shopify-connector-setup-guide.md).
 
 Screenshots come from a BC sandbox (company ORQA D.O.O.) connected to the Shopify dev store
 `croatia-test.myshopify.com`. All data in them is demo data; the customer *Test Kupac* is invented.
