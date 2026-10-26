@@ -10,9 +10,10 @@ order-to-cash and B2B.
 | **Worked example** | BC sandbox `Sandbox`, company ORQA D.O.O. → Shopify dev store `croatia-test.myshopify.com`, shop code `CROATIA` |
 | **Ticket** | Azure DevOps work item 112 |
 
-> **About the screenshots.** They were taken in the BC sandbox on 2026-10-26, **before the store was
-> connected**. The values you see are the connector's defaults, not the values this guide recommends.
-> Pink numbered badges match the numbered rows in the table under each screenshot.
+> **About the screenshots.** They were taken in the BC sandbox on 2026-10-26. Steps 1–10 show the
+> connector's **defaults**, captured before the store was connected. **Part 2** shows the values actually
+> set for the worked example, and **Part 3** shows a test order going from Shopify into BC. Pink numbered
+> badges match the numbered rows in the table under each screenshot. All customer data is invented.
 
 ## Order of work
 
@@ -213,10 +214,150 @@ you test, to see progress and detailed errors.
 
 ---
 
-## Still to capture
+---
 
-These screens need the connected store, so they are not in this version of the guide:
+# Part 2 — First-time setup: the worked example
 
-- the Shopify app-install screen (step 2);
-- the Locations page filled with the store's Shopify locations (step 9);
-- the result of the first sync (step 10).
+These are the values set on shop `CROATIA` in the ORQA sandbox, with Shopify as the product master. Use them
+as a starting point and replace the codes with your company's own.
+
+| Area | Field | Value used | Why |
+|---|---|---|---|
+| Items | Sync Item | From Shopify | Products are maintained in Shopify |
+| Items | Auto Create Unknown Items | On | First import creates the items |
+| Items | Shopify Can Update Items | On | Later changes in Shopify flow to BC |
+| Items | Item Template Code | `GOTOV PROIZVOD` | The company's finished-goods template |
+| Items | Sync Item Images | From Shopify | Images come with the products |
+| Customers | Auto Create Unknown Customers | On | Web-shop buyers become BC customers |
+| Customers | Customer/Company Template Code | `K-DOM` | Domestic customers |
+| Orders | Shipping Charges Account | `41000` | **Sandbox test only.** It is an expense account; use a revenue account in production |
+| Orders | Auto Create Sales Orders | On | Imported orders become sales orders |
+| Locations | Default Location Code / Location Filter on *Shop location* | `WH500C` | Central finished-goods warehouse |
+| General | Run Syncs in Background | Off | Shows sync results directly while testing |
+
+![Part 2 — item settings as configured](images/shopify-setup-12-configured-items.jpg)
+
+| # | Field | Value |
+|---|---|---|
+| 1 | Sync Item | From Shopify |
+| 2 | Auto Create Unknown Items | On |
+| 3 | Shopify Can Update Items | On |
+| 4 | Item Template Code | `GOTOV PROIZVOD`. In the test, the field became editable and mandatory once rows 1–3 were set. |
+| 5 | Sync Item Images | From Shopify |
+
+![Part 2 — customer settings as configured](images/shopify-setup-13-configured-customers.jpg)
+
+| # | Field | Value |
+|---|---|---|
+| 1 | Customer Import from Shopify | With Order Import (default) |
+| 2 | Customer Mapping Type | By EMail/Phone (default) |
+| 3 | Auto Create Unknown Customers | On |
+| 4 | Customer/Company Template Code | `K-DOM` |
+
+![Part 2 — order settings as configured](images/shopify-setup-14-configured-orders.jpg)
+
+| # | Field | Value |
+|---|---|---|
+| 1 | Shipping Charges Account | `41000` |
+| 2 | Auto Create Sales Orders | On |
+| 3 | Auto Release Sales Orders | On (default) |
+
+**Locations.** Open **Related → Locations** and choose **Get Shopify Locations**. The connector reads the store's
+locations: here *Shop location* (primary), *My Custom Location* and *Snow City Warehouse* (a fulfillment
+service). Choose **Edit List** and map the primary location:
+
+![Part 2 — Shopify locations mapped to WH500C](images/shopify-setup-15-locations-mapped.jpg)
+
+| # | Field | Value |
+|---|---|---|
+| 1 | **Get Shopify Locations** | Reads the locations from Shopify |
+| 2 | Default Location Code | `WH500C`: the location put on order lines |
+| 3 | Location Filter | `WH500C`: the location(s) whose stock is counted for Shopify |
+
+**First product import.** The dev store already contains Shopify's demo products:
+
+![Part 2 — products in the Shopify store](images/shopify-setup-16-shopify-products.jpg)
+
+On the Shop card, choose **Synchronization → Sync Products**. With *Sync Item = From Shopify*, BC imports
+them (16 in this store) and creates items from the item template:
+
+![Part 2 — Sync Products importing 16 products](images/shopify-setup-17-sync-products-progress.jpg)
+
+---
+
+# Part 3 — Test an order end to end
+
+```mermaid
+flowchart LR
+    A[Shopify: draft order] --> B[Mark as paid → order #1001] --> C[BC: Sync Orders] --> D[Shopify Orders list] --> E[Sales order created]
+```
+
+## 3.1 Create a test order in Shopify
+
+In Shopify admin, open **Orders → Drafts → Create order**:
+
+![Part 3 — draft order with product and test customer](images/shopify-setup-18-shopify-draft-order.jpg)
+
+| # | Action |
+|---|---|
+| 1 | **+ Product**: add a product that was imported in Part 2 (here *The Videographer Snowboard*). |
+| 2 | **Customer**: choose *Create a new customer* and use invented data (here *Test Kupac*, `test.kupac@example.com`). |
+| — | Then choose **Collect payment → Mark as paid**. |
+
+![Part 3 — Mark as paid creates the order](images/shopify-setup-19-shopify-mark-as-paid.png)
+
+**Create order** turns the draft into a real order. **Mark as paid** records the payment without a payment
+gateway, so no card details are needed.
+
+![Part 3 — order #1001, paid and unfulfilled](images/shopify-setup-20-shopify-order-paid.png)
+
+| # | What to check |
+|---|---|
+| 2 | Payment status **Paid** |
+| 3 | Customer **Test Kupac** |
+
+The order number (`#1001` here) is shown at the top.
+
+## 3.2 Import the order into BC
+
+On the Shop card, choose **Synchronization → Sync Orders**, leave the filters as they are (shop `CROATIA`
+is prefilled), and choose **OK**. Then search for **Shopify Orders**:
+
+![Part 3 — the imported order in Shopify Orders, with its sales order](images/shopify-setup-21-bc-shopify-orders.jpg)
+
+| # | What it shows |
+|---|---|
+| 1 | Shopify order `#1001` |
+| 2 | Customer **K-000074**, created from template `K-DOM` because *Auto Create Unknown Customers* is on |
+| 3 | Financial status **Paid** |
+| 4 | Linked document: **Sales Order** `P-NAL-26-000027`, created because *Auto Create Sales Orders* is on |
+
+## 3.3 Check the sales order
+
+![Part 3 — the sales order created from the Shopify order](images/shopify-setup-22-bc-sales-order.jpg)
+
+| # | What to check | Result in the test |
+|---|---|---|
+| 1 | Item | `100042` *The Videographer Snowboard*, the item created by the product import |
+| 2 | Location Code | `WH500C`, from the location mapping |
+| 3 | Total VAT | **221.49**: BC added 25 % VAT, but the Shopify order had no tax |
+| 4 | Total Incl. VAT | **1,107.44**, versus 885.95 paid in Shopify |
+
+The order arrives **released**, because *Auto Release Sales Orders* is on.
+
+## 3.4 What the test showed: fix before go-live
+
+| Finding | Seen in the test | What to do |
+|---|---|---|
+| **Currency** | The Shopify order is in **USD 885.95**; the BC order shows **885.95 EUR**. The shop's **Currency Code** is blank, and the field's tooltip says to leave it blank only when the store uses the local currency. | Either set the store's currency to EUR in Shopify, or set **Currency Code** = `USD` on the Shop card and maintain USD exchange rates. |
+| **VAT** | The BC total (1,107.44) does not match the Shopify total (885.95). The Shopify order had no tax and is not tax-included, and BC calculated 25 % VAT on top. | Decide with the customer whether Shopify prices include VAT, and align Shopify's tax settings and the VAT posting setup that the customer template brings. |
+| **Inventory posting** | After the product and order syncs, BC showed *"Inventory Account is missing in Inventory Posting Setup"*. | Complete **Inventory Posting Setup** for location `WH500C` before posting a shipment. |
+| **Customer country** | The test customer got Country/Region `US`, because the draft order used Shopify's *United States* market and no address was entered. | Enter a full address on test orders, and set up the store's markets for Croatia. |
+
+---
+
+## Not captured
+
+- **The Shopify app-install screen (step 2).** It opens in a separate pop-up window that browser automation
+  cannot reach.
+- **Posting the sales order.** It was left unposted because the inventory posting setup above is incomplete.
