@@ -1,0 +1,1380 @@
+{
+ "schema": 1,
+ "project": "Shopify Connector",
+ "commit": "6f261e89",
+ "generated": "2026-10-26",
+ "roots": [
+  "App/src",
+  "Test"
+ ],
+ "read_with": [
+  "al graph extract-whole (AL tools 18.1.43): call edges",
+  "source declarations: interface / implements"
+ ],
+ "cannot_see": [
+  "Record use is not a link. Links are calls between procedures (al graph). A module that only reads or writes another module's table — for example almost every module using the `Shpfy Shop` record from Base — gets no link for that. Treat the counts as call coupling, not data coupling.",
+  "Interface dispatch is over-counted. A call through an interface is linked to every implementer (1,795 edges marked OverApprox). Catalogs → GraphQL and Inventory → GraphQL show 284 such links each; they are listed apart from direct calls.",
+  "The GraphQL path goes through an enum. Modules call ExecuteGraphQL in `Shpfy Communication Mgt.` (Base) with a `Shpfy GraphQL Type` value; which GraphQL codeunit runs is decided at runtime.",
+  "Events raised by the platform (table triggers, job queue, `Webhook Notification` inserts) and event subscribers in other apps.",
+  "Other apps. Base Application and System Application calls are not mapped; the connector's 70 integration events (6 codeunits) are extension points for other apps, and their subscribers are outside this repository.",
+  "Pages and reports run by object id, `Codeunit.Run`/`Report.Run` with a number, and anything chosen from a setup field.",
+  "Shopify itself — what the Admin API does with a request.",
+  "The root `app.json` (`Shopify` 1.0.0.0) is not the connector and was not mapped."
+ ],
+ "components": [
+  {
+   "id": "base",
+   "title": "Base",
+   "kind": "component",
+   "purpose": "The Shop card and setup: Shop table, Shopify Activities cues, Communication Mgt. (every HTTP call to Shopify), background syncs, install/upgrade, guided setup.",
+   "paths": [
+    "App/src/Base"
+   ],
+   "depends_on": [
+    {
+     "id": "integration",
+     "refs": 11,
+     "interface_refs": 0
+    },
+    {
+     "id": "helpers",
+     "refs": 8,
+     "interface_refs": 0
+    },
+    {
+     "id": "webhooks",
+     "refs": 6,
+     "interface_refs": 0
+    },
+    {
+     "id": "graphql",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "products",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "inventory",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "bulk-operations",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "shipping",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "invoicing",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-fulfillments",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Order Handling",
+    "Test/Inventory",
+    "Test/Invoices",
+    "Test/Base",
+    "Test/Products",
+    "Test/Shipping",
+    "Test/Customers",
+    "Test/Webhooks",
+    "Test/Bulk Operations",
+    "Test/Catalogs",
+    "Test/Companies",
+    "Test/Staff",
+    "Test/Order Refunds"
+   ],
+   "implements": []
+  },
+  {
+   "id": "bulk-operations",
+   "title": "Bulk Operations",
+   "kind": "component",
+   "purpose": "Shopify bulk mutations (prices, images) and their status, finished by webhook.",
+   "paths": [
+    "App/src/Bulk Operations"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 12,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 10,
+     "interface_refs": 0
+    },
+    {
+     "id": "webhooks",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Bulk Operations",
+    "Test/Webhooks"
+   ],
+   "implements": [
+    "Shpfy IBulk Operation"
+   ]
+  },
+  {
+   "id": "catalogs",
+   "title": "Catalogs",
+   "kind": "component",
+   "purpose": "B2B catalogs and catalog prices for companies and markets.",
+   "paths": [
+    "App/src/Catalogs"
+   ],
+   "depends_on": [
+    {
+     "id": "graphql",
+     "refs": 2,
+     "interface_refs": 284
+    },
+    {
+     "id": "helpers",
+     "refs": 25,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 20,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-handling",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "products",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Catalogs",
+    "Test/Logs"
+   ],
+   "implements": []
+  },
+  {
+   "id": "companies",
+   "title": "Companies",
+   "kind": "component",
+   "purpose": "B2B companies and locations: import/export, company mapping, tax registration id mapping.",
+   "paths": [
+    "App/src/Companies"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 30,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 28,
+     "interface_refs": 0
+    },
+    {
+     "id": "customers",
+     "refs": 8,
+     "interface_refs": 0
+    },
+    {
+     "id": "metafields",
+     "refs": 5,
+     "interface_refs": 0
+    },
+    {
+     "id": "catalogs",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Companies",
+    "Test/Metafields"
+   ],
+   "implements": [
+    "Shpfy ICompany Mapping",
+    "Shpfy IFind Company Mapping",
+    "Shpfy Tax Registration Id Mapping"
+   ]
+  },
+  {
+   "id": "customers",
+   "title": "Customers",
+   "kind": "component",
+   "purpose": "Customer import/export and mapping (by e-mail/phone, by bill-to, default customer), name and county formats, templates per country.",
+   "paths": [
+    "App/src/Customers"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 36,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 28,
+     "interface_refs": 0
+    },
+    {
+     "id": "metafields",
+     "refs": 5,
+     "interface_refs": 0
+    },
+    {
+     "id": "companies",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Customers",
+    "Test/Companies",
+    "Test/Logs",
+    "Test/Invoices",
+    "Test/Metafields"
+   ],
+   "implements": [
+    "Shpfy ICounty",
+    "Shpfy ICounty From Json",
+    "Shpfy ICustomer Mapping",
+    "Shpfy ICustomer Name"
+   ]
+  },
+  {
+   "id": "document-links",
+   "title": "Document Links",
+   "kind": "component",
+   "purpose": "Links between a Shopify document and the BC documents made from it, and the 'open document' actions.",
+   "paths": [
+    "App/src/Document Links"
+   ],
+   "depends_on": [],
+   "tested_by": [],
+   "implements": [
+    "Shpfy IOpenBCDocument",
+    "Shpfy IOpenShopifyDocument"
+   ]
+  },
+  {
+   "id": "gift-cards",
+   "title": "Gift Cards",
+   "kind": "component",
+   "purpose": "Gift cards sold and used in orders.",
+   "paths": [
+    "App/src/Gift Cards"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 2,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Gift Cards"
+   ],
+   "implements": []
+  },
+  {
+   "id": "graphql",
+   "title": "GraphQL",
+   "kind": "component",
+   "purpose": "One codeunit per Shopify Admin GraphQL query or mutation (143 of them), picked through the GraphQL Type enum.",
+   "paths": [
+    "App/src/GraphQL"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/GraphQL",
+    "Test/Products"
+   ],
+   "implements": [
+    "Shpfy IGraphQL"
+   ]
+  },
+  {
+   "id": "helpers",
+   "title": "Helpers",
+   "kind": "component",
+   "purpose": "Shared utilities: JSON reading, hashing, Base64, maths. Used by almost every module.",
+   "paths": [
+    "App/src/Helpers"
+   ],
+   "depends_on": [],
+   "tested_by": [
+    "Test/Helpers",
+    "Test/Order Handling"
+   ],
+   "implements": []
+  },
+  {
+   "id": "integration",
+   "title": "Integration",
+   "kind": "component",
+   "purpose": "OAuth sign-in to a Shopify store: Authentication Mgt., the Authentication page, the registered-store table.",
+   "paths": [
+    "App/src/Integration"
+   ],
+   "depends_on": [
+    {
+     "id": "base",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "helpers",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Base"
+   ],
+   "implements": []
+  },
+  {
+   "id": "inventory",
+   "title": "Inventory",
+   "kind": "component",
+   "purpose": "Stock levels to Shopify per location: Shop Locations mapping, stock calculation methods, Inventory API.",
+   "paths": [
+    "App/src/Inventory"
+   ],
+   "depends_on": [
+    {
+     "id": "graphql",
+     "refs": 2,
+     "interface_refs": 284
+    },
+    {
+     "id": "helpers",
+     "refs": 24,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 10,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-fulfillments",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Inventory"
+   ],
+   "implements": [
+    "Shpfy IStock Available",
+    "Shpfy Stock Calculation"
+   ]
+  },
+  {
+   "id": "invoicing",
+   "title": "Invoicing",
+   "kind": "component",
+   "purpose": "Posted sales invoices exported to Shopify as orders (Sync Invoices to Shopify).",
+   "paths": [
+    "App/src/Invoicing"
+   ],
+   "depends_on": [
+    {
+     "id": "base",
+     "refs": 12,
+     "interface_refs": 0
+    },
+    {
+     "id": "helpers",
+     "refs": 8,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Invoices",
+    "Test/Logs"
+   ],
+   "implements": []
+  },
+  {
+   "id": "logs",
+   "title": "Logs",
+   "kind": "component",
+   "purpose": "Log Entries (request/response per call), Skipped Records, Data Capture.",
+   "paths": [
+    "App/src/Logs"
+   ],
+   "depends_on": [
+    {
+     "id": "base",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "helpers",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Logs"
+   ],
+   "implements": []
+  },
+  {
+   "id": "metafields",
+   "title": "Metafields",
+   "kind": "component",
+   "purpose": "Metafields on products, variants, customers and companies, one codeunit per metafield type.",
+   "paths": [
+    "App/src/Metafields"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 29,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 15,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Metafields"
+   ],
+   "implements": [
+    "Shpfy IMetafield Owner Type",
+    "Shpfy IMetafield Type"
+   ]
+  },
+  {
+   "id": "order-fulfillments",
+   "title": "Order Fulfillments",
+   "kind": "component",
+   "purpose": "Fulfillment orders and fulfillments read from Shopify; used to send shipments back.",
+   "paths": [
+    "App/src/Order Fulfillments"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 30,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 22,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "inventory",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "gift-cards",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Order Fulfillments"
+   ],
+   "implements": []
+  },
+  {
+   "id": "order-handling",
+   "title": "Order handling",
+   "kind": "component",
+   "purpose": "Shopify orders: import (Orders API, Import Order), mapping (Order Mapping), sales document creation (Process Order), order pages and the sales-document extensions.",
+   "paths": [
+    "App/src/Order handling"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 48,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 29,
+     "interface_refs": 0
+    },
+    {
+     "id": "customers",
+     "refs": 6,
+     "interface_refs": 14
+    },
+    {
+     "id": "order-return-refund-processing",
+     "refs": 4,
+     "interface_refs": 12
+    },
+    {
+     "id": "order-fulfillments",
+     "refs": 4,
+     "interface_refs": 0
+    },
+    {
+     "id": "companies",
+     "refs": 4,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-returns",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-refunds",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-risks",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "products",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "shipping",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "transactions",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Order Handling",
+    "Test/Shipping",
+    "Test/Gift Cards",
+    "Test/Staff"
+   ],
+   "implements": []
+  },
+  {
+   "id": "order-refunds",
+   "title": "Order Refunds",
+   "kind": "component",
+   "purpose": "Refunds read from Shopify.",
+   "paths": [
+    "App/src/Order Refunds"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 20,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-return-refund-processing",
+     "refs": 4,
+     "interface_refs": 12
+    },
+    {
+     "id": "base",
+     "refs": 8,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-handling",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-returns",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Order Refunds"
+   ],
+   "implements": []
+  },
+  {
+   "id": "order-return-refund-processing",
+   "title": "Order Return Refund Processing",
+   "kind": "component",
+   "purpose": "What to do with returns and refunds: Import Only, Default, or create a Credit Memo (IReturnRefund Process).",
+   "paths": [
+    "App/src/Order Return Refund Processing"
+   ],
+   "depends_on": [
+    {
+     "id": "order-handling",
+     "refs": 5,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-refunds",
+     "refs": 2,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Order Refunds"
+   ],
+   "implements": [
+    "Shpfy Extended IDocument Source",
+    "Shpfy IDocument Source",
+    "Shpfy IReturnRefund Process"
+   ]
+  },
+  {
+   "id": "order-returns",
+   "title": "Order Returns",
+   "kind": "component",
+   "purpose": "Returns read from Shopify.",
+   "paths": [
+    "App/src/Order Returns"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 25,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 10,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-handling",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [],
+   "implements": []
+  },
+  {
+   "id": "order-risks",
+   "title": "Order Risks",
+   "kind": "component",
+   "purpose": "Fraud risk assessments of an order.",
+   "paths": [
+    "App/src/Order Risks"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 6,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 5,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Order Risks"
+   ],
+   "implements": []
+  },
+  {
+   "id": "payments",
+   "title": "Payments",
+   "kind": "component",
+   "purpose": "Shopify Payments: payouts, payment transactions, disputes, payment terms mapping.",
+   "paths": [
+    "App/src/Payments"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 36,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 20,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 2,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Payments"
+   ],
+   "implements": []
+  },
+  {
+   "id": "permissionsets",
+   "title": "PermissionSets",
+   "kind": "component",
+   "purpose": "The connector's permission sets.",
+   "paths": [
+    "App/src/PermissionSets"
+   ],
+   "depends_on": [],
+   "tested_by": [],
+   "implements": []
+  },
+  {
+   "id": "products",
+   "title": "Products",
+   "kind": "component",
+   "purpose": "Products and variants: import from and export to Shopify, item creation, price calculation, images, collections, sales channels.",
+   "paths": [
+    "App/src/Products"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 88,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 71,
+     "interface_refs": 0
+    },
+    {
+     "id": "bulk-operations",
+     "refs": 6,
+     "interface_refs": 4
+    },
+    {
+     "id": "metafields",
+     "refs": 7,
+     "interface_refs": 0
+    },
+    {
+     "id": "translations",
+     "refs": 3,
+     "interface_refs": 1
+    }
+   ],
+   "tested_by": [
+    "Test/Products",
+    "Test/Logs",
+    "Test/Catalogs",
+    "Test/Bulk Operations"
+   ],
+   "implements": [
+    "Shpfy ICreateProductStatusValue",
+    "Shpfy IRemoveProductAction"
+   ]
+  },
+  {
+   "id": "shipping",
+   "title": "Shipping",
+   "kind": "component",
+   "purpose": "Shipping charges and shipment-method mapping; Sync Shipments to Shopify (Export Shipments).",
+   "paths": [
+    "App/src/Shipping"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 18,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 11,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-fulfillments",
+     "refs": 2,
+     "interface_refs": 0
+    },
+    {
+     "id": "inventory",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 1,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-handling",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [],
+   "implements": []
+  },
+  {
+   "id": "staff",
+   "title": "Staff",
+   "kind": "component",
+   "purpose": "Shopify staff members mapped to BC salespeople.",
+   "paths": [
+    "App/src/Staff"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 6,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 5,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Staff"
+   ],
+   "implements": []
+  },
+  {
+   "id": "transactions",
+   "title": "Transactions",
+   "kind": "component",
+   "purpose": "Order transactions, payment gateways and the payment-method mapping; Suggest Payments for the cash receipt journal.",
+   "paths": [
+    "App/src/Transactions"
+   ],
+   "depends_on": [
+    {
+     "id": "base",
+     "refs": 5,
+     "interface_refs": 0
+    },
+    {
+     "id": "helpers",
+     "refs": 5,
+     "interface_refs": 0
+    },
+    {
+     "id": "order-handling",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "logs",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [
+    "Test/Payments"
+   ],
+   "implements": []
+  },
+  {
+   "id": "translations",
+   "title": "Translations",
+   "kind": "component",
+   "purpose": "Product translations to Shopify languages.",
+   "paths": [
+    "App/src/Translations"
+   ],
+   "depends_on": [
+    {
+     "id": "helpers",
+     "refs": 6,
+     "interface_refs": 0
+    },
+    {
+     "id": "base",
+     "refs": 4,
+     "interface_refs": 0
+    },
+    {
+     "id": "products",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [],
+   "implements": [
+    "Shpfy ICreate Translation"
+   ]
+  },
+  {
+   "id": "webhooks",
+   "title": "Webhooks",
+   "kind": "component",
+   "purpose": "Webhook subscriptions in Shopify and their handling in BC (order created, bulk operation finished).",
+   "paths": [
+    "App/src/Webhooks"
+   ],
+   "depends_on": [
+    {
+     "id": "base",
+     "refs": 9,
+     "interface_refs": 0
+    },
+    {
+     "id": "helpers",
+     "refs": 3,
+     "interface_refs": 0
+    },
+    {
+     "id": "bulk-operations",
+     "refs": 1,
+     "interface_refs": 0
+    }
+   ],
+   "tested_by": [],
+   "implements": []
+  }
+ ],
+ "interfaces": [
+  {
+   "id": "Shpfy Extended IDocument Source",
+   "path": "App/src/Order Return Refund Processing/Interfaces/ShpfyExtendedIDocumentSource.Interface.al",
+   "implementers": [
+    "codeunit Shpfy IDocSource Refund"
+   ]
+  },
+  {
+   "id": "Shpfy Extended Stock Calculation",
+   "path": "App/src/Inventory/Interface/ShpfyExtendedStockCalculation.Interface.al",
+   "implementers": []
+  },
+  {
+   "id": "Shpfy IBulk Operation",
+   "path": "App/src/Bulk Operations/Interfaces/ShpfyIBulkOperation.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Bulk UpdateProductImage",
+    "codeunit Shpfy Bulk UpdateProductPrice",
+    "enum Shpfy Bulk Operation Type"
+   ]
+  },
+  {
+   "id": "Shpfy ICompany Mapping",
+   "path": "App/src/Companies/Interfaces/ShpfyICompanyMapping.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Comp. By Default Comp.",
+    "codeunit Shpfy Comp. By Email/Phone",
+    "codeunit Shpfy Comp. By Tax Id",
+    "enum Shpfy Company Mapping"
+   ]
+  },
+  {
+   "id": "Shpfy ICounty",
+   "path": "App/src/Customers/Interfaces/ShpfyICounty.Interface.al",
+   "implementers": [
+    "codeunit Shpfy County Code",
+    "codeunit Shpfy County Name",
+    "enum Shpfy County Source"
+   ]
+  },
+  {
+   "id": "Shpfy ICounty From Json",
+   "path": "App/src/Customers/Interfaces/ShpfyICountyFromJson.Interface.al",
+   "implementers": [
+    "codeunit Shpfy County From Json Code",
+    "codeunit Shpfy County From Json Name",
+    "enum Shpfy County Source"
+   ]
+  },
+  {
+   "id": "Shpfy ICreate Translation",
+   "path": "App/src/Translations/Interfaces/ShpfyICreateTranslation.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Create Transl. Product",
+    "enum Shpfy Resource Type"
+   ]
+  },
+  {
+   "id": "Shpfy ICreateProductStatusValue",
+   "path": "App/src/Products/Interfaces/ShpfyICreateProductStatusValue.Interface.al",
+   "implementers": [
+    "codeunit Shpfy CreateProdStatusActive",
+    "codeunit Shpfy CreateProdStatusDraft",
+    "enum Shpfy Cr. Prod. Status Value"
+   ]
+  },
+  {
+   "id": "Shpfy ICustomer Mapping",
+   "path": "App/src/Customers/Interfaces/ShpfyICustomerMapping.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Cust. By Bill-to",
+    "codeunit Shpfy Cust. By Default Cust.",
+    "codeunit Shpfy Cust. By Email/Phone",
+    "enum Shpfy Customer Mapping"
+   ]
+  },
+  {
+   "id": "Shpfy ICustomer Name",
+   "path": "App/src/Customers/Interfaces/ShpfyICustomerName.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Name is CompanyName",
+    "codeunit Shpfy Name is Empty",
+    "codeunit Shpfy Name is First. LastName",
+    "codeunit Shpfy Name is Last. FirstName",
+    "enum Shpfy Name Source"
+   ]
+  },
+  {
+   "id": "Shpfy IDocument Source",
+   "path": "App/src/Order Return Refund Processing/Interfaces/ShpfyIDocumentSource.Interface.al",
+   "implementers": [
+    "codeunit Shpfy IDocSource Default",
+    "codeunit Shpfy IDocSource Refund",
+    "enum Shpfy Source Document Type"
+   ]
+  },
+  {
+   "id": "Shpfy IFind Company Mapping",
+   "path": "App/src/Companies/Interfaces/ShpfyIFindCompanyMapping.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Comp. By Default Comp.",
+    "codeunit Shpfy Comp. By Email/Phone",
+    "codeunit Shpfy Comp. By Tax Id"
+   ]
+  },
+  {
+   "id": "Shpfy IGraphQL",
+   "path": "App/src/GraphQL/Interfaces/ShpfyIGraphQL.Interface.al",
+   "implementers": [
+    "codeunit Shpfy GQL AcceptFFRequest",
+    "codeunit Shpfy GQL AddImageToProduct",
+    "codeunit Shpfy GQL AddProductImage",
+    "codeunit Shpfy GQL AddVariantImage",
+    "codeunit Shpfy GQL AllCustomerIds",
+    "codeunit Shpfy GQL ApiKey",
+    "codeunit Shpfy GQL AssignedFFOrders",
+    "codeunit Shpfy GQL BulkOpMutation",
+    "codeunit Shpfy GQL BulkOperation",
+    "codeunit Shpfy GQL Catalog Markets",
+    "codeunit Shpfy GQL CatalogPrices",
+    "codeunit Shpfy GQL CatalogProducts",
+    "codeunit Shpfy GQL Catalogs",
+    "codeunit Shpfy GQL CloseOrder",
+    "codeunit Shpfy GQL CompLocation",
+    "codeunit Shpfy GQL CompLocations",
+    "codeunit Shpfy GQL Company",
+    "codeunit Shpfy GQL CompanyAssignConRole",
+    "codeunit Shpfy GQL CompanyAssignContact",
+    "codeunit Shpfy GQL CompanyAssignMainCon",
+    "codeunit Shpfy GQL CompanyIds",
+    "codeunit Shpfy GQL CompanyMetafieldIds",
+    "codeunit Shpfy GQL CreateCatalog",
+    "codeunit Shpfy GQL CreateCompLocTaxId",
+    "codeunit Shpfy GQL CreateFulfillmentSvc",
+    "codeunit Shpfy GQL CreatePriceList",
+    "codeunit Shpfy GQL CreatePublication",
+    "codeunit Shpfy GQL CreateUploadUrl",
+    "codeunit Shpfy GQL CreateWebhookSub",
+    "codeunit Shpfy GQL CustProdCollections",
+    "codeunit Shpfy GQL Customer",
+    "codeunit Shpfy GQL CustomerIds",
+    "codeunit Shpfy GQL CustomerMetafieldIds",
+    "codeunit Shpfy GQL DeleteWebhookSub",
+    "codeunit Shpfy GQL DeliveryMethods",
+    "codeunit Shpfy GQL DeliveryProfiles",
+    "codeunit Shpfy GQL DisputeById",
+    "codeunit Shpfy GQL Disputes",
+    "codeunit Shpfy GQL DraftOrderComplete",
+    "codeunit Shpfy GQL FFOrdersFromOrder",
+    "codeunit Shpfy GQL FindCustByEMail",
+    "codeunit Shpfy GQL FindCustByPhone",
+    "codeunit Shpfy GQL FindVariantByBarcode",
+    "codeunit Shpfy GQL FindVariantBySKU",
+    "codeunit Shpfy GQL Fulfill Order",
+    "codeunit Shpfy GQL Get Fulfillments",
+    "codeunit Shpfy GQL Get Next S. Channels",
+    "codeunit Shpfy GQL Get SalesChannels",
+    "codeunit Shpfy GQL GetProductImage",
+    "codeunit Shpfy GQL GetProductOptions",
+    "codeunit Shpfy GQL GetStaffMembers",
+    "codeunit Shpfy GQL GetVariantImage",
+    "codeunit Shpfy GQL GetWebhookSubs",
+    "codeunit Shpfy GQL InventoryActivate",
+    "codeunit Shpfy GQL InventoryEntries",
+    "codeunit Shpfy GQL Location",
+    "codeunit Shpfy GQL LocationGroups",
+    "codeunit Shpfy GQL LocationOrderLines",
+    "codeunit Shpfy GQL Locations",
+    "codeunit Shpfy GQL MarkOrderAsPaid",
+    "codeunit Shpfy GQL Market Catalogs",
+    "codeunit Shpfy GQL MetafieldDefinitions",
+    "codeunit Shpfy GQL MetafieldsSet",
+    "codeunit Shpfy GQL Modify Inventory",
+    "codeunit Shpfy GQL Next Locations",
+    "codeunit Shpfy GQL NextAllCustomerIds",
+    "codeunit Shpfy GQL NextAssignedFFOrders",
+    "codeunit Shpfy GQL NextCatalogMarkets",
+    "codeunit Shpfy GQL NextCatalogPrices",
+    "codeunit Shpfy GQL NextCatalogProducts",
+    "codeunit Shpfy GQL NextCatalogs",
+    "codeunit Shpfy GQL NextCompLocations",
+    "codeunit Shpfy GQL NextCompanyIds",
+    "codeunit Shpfy GQL NextCustProdColls",
+    "codeunit Shpfy GQL NextCustomerIds",
+    "codeunit Shpfy GQL NextDeliveryMethods",
+    "codeunit Shpfy GQL NextDeliveryProfiles",
+    "codeunit Shpfy GQL NextDisputes",
+    "codeunit Shpfy GQL NextFFOrdersFromOrd",
+    "codeunit Shpfy GQL NextFulfillmentLines",
+    "codeunit Shpfy GQL NextGetFulfillments",
+    "codeunit Shpfy GQL NextInvEntries",
+    "codeunit Shpfy GQL NextMarketCatalogs",
+    "codeunit Shpfy GQL NextOpenFFOrderLines",
+    "codeunit Shpfy GQL NextOpenOrdToImport",
+    "codeunit Shpfy GQL NextOrderLines",
+    "codeunit Shpfy GQL NextOrderReturns",
+    "codeunit Shpfy GQL NextOrdersToImport",
+    "codeunit Shpfy GQL NextPaymTransactions",
+    "codeunit Shpfy GQL NextPayouts",
+    "codeunit Shpfy GQL NextProductIds",
+    "codeunit Shpfy GQL NextProductImages",
+    "codeunit Shpfy GQL NextRefundLines",
+    "codeunit Shpfy GQL NextRefundShipLines",
+    "codeunit Shpfy GQL NextReturnLines",
+    "codeunit Shpfy GQL NextRevFulfillOrdLns",
+    "codeunit Shpfy GQL NextRevFulfillOrders",
+    "codeunit Shpfy GQL NextShipmentLines",
+    "codeunit Shpfy GQL NextStaffMembers",
+    "codeunit Shpfy GQL NextVariantIds",
+    "codeunit Shpfy GQL NextVariantImages",
+    "codeunit Shpfy GQL OpenFulfillmOrdLines",
+    "codeunit Shpfy GQL OpenOrdersToImport",
+    "codeunit Shpfy GQL OrderCancel",
+    "codeunit Shpfy GQL OrderFulfillment",
+    "codeunit Shpfy GQL OrderHeader",
+    "codeunit Shpfy GQL OrderLines",
+    "codeunit Shpfy GQL OrderRisks",
+    "codeunit Shpfy GQL OrderTransactions",
+    "codeunit Shpfy GQL OrdersToImport",
+    "codeunit Shpfy GQL PaymTransByIds",
+    "codeunit Shpfy GQL Payment Terms",
+    "codeunit Shpfy GQL PaymentTransactions",
+    "codeunit Shpfy GQL Payouts",
+    "codeunit Shpfy GQL PayoutsByIds",
+    "codeunit Shpfy GQL ProductById",
+    "codeunit Shpfy GQL ProductIds",
+    "codeunit Shpfy GQL ProductImages",
+    "codeunit Shpfy GQL ProductMetafieldIds",
+    "codeunit Shpfy GQL RefundHeader",
+    "codeunit Shpfy GQL RefundLines",
+    "codeunit Shpfy GQL RefundShippingLines",
+    "codeunit Shpfy GQL ReturnHeader",
+    "codeunit Shpfy GQL ReturnLines",
+    "codeunit Shpfy GQL RevFulfillOrderLines",
+    "codeunit Shpfy GQL RevFulfillOrders",
+    "codeunit Shpfy GQL SetVariantImage",
+    "codeunit Shpfy GQL ShipToCountries",
+    "codeunit Shpfy GQL ShipmentLines",
+    "codeunit Shpfy GQL ShopLocales",
+    "codeunit Shpfy GQL TranslResource",
+    "codeunit Shpfy GQL TranslationsRegister",
+    "codeunit Shpfy GQL UpdateCatalogPrices",
+    "codeunit Shpfy GQL UpdateFulfillmentSvc",
+    "codeunit Shpfy GQL UpdateLocPmtTerms",
+    "codeunit Shpfy GQL UpdateOrderAttr",
+    "codeunit Shpfy GQL UpdateProductImage",
+    "codeunit Shpfy GQL UpdateProductOption",
+    "codeunit Shpfy GQL VariantById",
+    "codeunit Shpfy GQL VariantIds",
+    "codeunit Shpfy GQL VariantImages",
+    "codeunit Shpfy GQL VariantMetafieldIds",
+    "enum Shpfy GraphQL Type"
+   ]
+  },
+  {
+   "id": "Shpfy IMetafield Owner Type",
+   "path": "App/src/Metafields/Interfaces/ShpfyIMetafieldOwnerType.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Metafield Owner Company",
+    "codeunit Shpfy Metafield Owner Customer",
+    "codeunit Shpfy Metafield Owner Product",
+    "codeunit Shpfy Metafield Owner Variant",
+    "enum Shpfy Metafield Owner Type"
+   ]
+  },
+  {
+   "id": "Shpfy IMetafield Type",
+   "path": "App/src/Metafields/Interfaces/ShpfyIMetafieldType.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Mtfld Type Article Ref",
+    "codeunit Shpfy Mtfld Type Boolean",
+    "codeunit Shpfy Mtfld Type Collect. Ref",
+    "codeunit Shpfy Mtfld Type Color",
+    "codeunit Shpfy Mtfld Type Company Ref",
+    "codeunit Shpfy Mtfld Type Customer Ref",
+    "codeunit Shpfy Mtfld Type Date",
+    "codeunit Shpfy Mtfld Type DateTime",
+    "codeunit Shpfy Mtfld Type Dimension",
+    "codeunit Shpfy Mtfld Type File Ref",
+    "codeunit Shpfy Mtfld Type Integer",
+    "codeunit Shpfy Mtfld Type Json",
+    "codeunit Shpfy Mtfld Type Metaobj. Ref",
+    "codeunit Shpfy Mtfld Type Mixed Ref",
+    "codeunit Shpfy Mtfld Type Money",
+    "codeunit Shpfy Mtfld Type Multi Text",
+    "codeunit Shpfy Mtfld Type Num Decimal",
+    "codeunit Shpfy Mtfld Type Num Integer",
+    "codeunit Shpfy Mtfld Type Page Ref",
+    "codeunit Shpfy Mtfld Type Product Ref",
+    "codeunit Shpfy Mtfld Type Single Text",
+    "codeunit Shpfy Mtfld Type String",
+    "codeunit Shpfy Mtfld Type Url",
+    "codeunit Shpfy Mtfld Type Variant Ref",
+    "codeunit Shpfy Mtfld Type Volume",
+    "codeunit Shpfy Mtfld Type Weight",
+    "enum Shpfy Metafield Type"
+   ]
+  },
+  {
+   "id": "Shpfy IOpenBCDocument",
+   "path": "App/src/Document Links/Interfaces/ShpfyIOpenBCDocument.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Open PostedReturnReceipt",
+    "codeunit Shpfy Open PostedSalesCrMemo",
+    "codeunit Shpfy Open PostedSalesInvoice",
+    "codeunit Shpfy Open SalesCrMemo",
+    "codeunit Shpfy Open SalesInvoice",
+    "codeunit Shpfy Open SalesOrder",
+    "codeunit Shpfy Open SalesReturnOrder",
+    "codeunit Shpfy Open SalesShipment",
+    "codeunit Shpfy OpenBCDoc NotSupported",
+    "enum Shpfy Document Type"
+   ]
+  },
+  {
+   "id": "Shpfy IOpenShopifyDocument",
+   "path": "App/src/Document Links/Interfaces/ShpfyIOpenShopifyDocument.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Open Order",
+    "codeunit Shpfy Open Refund",
+    "codeunit Shpfy Open Return",
+    "codeunit Shpfy OpenDoc NotSupported",
+    "enum Shpfy Shop Document Type"
+   ]
+  },
+  {
+   "id": "Shpfy IRemoveProductAction",
+   "path": "App/src/Products/Interfaces/ShpfyIRemoveProductAction.Interface.al",
+   "implementers": [
+    "codeunit Shpfy RemoveProductDoNothing",
+    "codeunit Shpfy ToArchivedProduct",
+    "codeunit Shpfy ToDraftProduct",
+    "enum Shpfy Remove Product Action"
+   ]
+  },
+  {
+   "id": "Shpfy IReturnRefund Process",
+   "path": "App/src/Order Return Refund Processing/Interfaces/ShpfyIReturnRefundProcess.Interface.al",
+   "implementers": [
+    "codeunit Shpfy RetRefProc Cr.Memo",
+    "codeunit Shpfy RetRefProc Default",
+    "codeunit Shpfy RetRefProc ImportOnly",
+    "enum Shpfy ReturnRefund ProcessType"
+   ]
+  },
+  {
+   "id": "Shpfy IStock Available",
+   "path": "App/src/Inventory/Interface/ShpfyIStockAvailable.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Can Have Stock",
+    "codeunit Shpfy Can Not Have Stock",
+    "enum Shpfy Stock Calculation"
+   ]
+  },
+  {
+   "id": "Shpfy Stock Calculation",
+   "path": "App/src/Inventory/Interface/ShpfyStockCalculation.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Balance Today",
+    "codeunit Shpfy Disabled Value",
+    "codeunit Shpfy Free Inventory",
+    "enum Shpfy Stock Calculation"
+   ]
+  },
+  {
+   "id": "Shpfy Tax Registration Id Mapping",
+   "path": "App/src/Companies/Interfaces/ShpfyTaxRegistrationIdMapping.Interface.al",
+   "implementers": [
+    "codeunit Shpfy Tax Registration No.",
+    "codeunit Shpfy VAT Registration No.",
+    "enum Shpfy Comp. Tax Id Mapping"
+   ]
+  }
+ ]
+}
